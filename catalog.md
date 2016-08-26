@@ -83,10 +83,24 @@ output = project %>% processParallel(analyse_tile, varlist = export)
     
 # Extract a ground inventory
 
-Ground inventory are usually done on circular areas. To make the link between lidar data an ground inventory data users need to extract the lidar data associated with the ground inventory. The `extractGroundInventory` function enable to extract these data automatically.
+Ground inventory are usually done on circular areas. To make the link between lidar data an ground inventory data users need to extract the lidar data associated with the ground inventory. The `roi_query` function enable to extract regions of interest (ROI) from a lidar dataset splitted in several files.
 
-The `extractGroundInventory` function expect a `Catalog` object as input as well as the `x` and `y` coordinates of the center of the plots and the associated radiuses of the plots. The field `plotnames` must contain a unique name for each plot.
+The `roi_query` function expect a `Catalog` object as input as well as the `x` and `y` coordinates of the center of the ROIs and the associated dimensions of the ROIs. The field `roinames` can contain a unique name for each ROI enabling to label the ouputed list.
 
-An internal algorithm will determine wich files must be loaded. For those plots falling between two or more tiles the algotithm is able to detect that and will load the appropriate files to extract automatically every plot. The process is done in multicore for Linux users.
+```r
+catalog = Catalog("<Path to a folder containing a set of las or laz files>")
+
+# Get coordinates from an external file
+X = runif(30, 690000, 800000)   # X coordinates
+Y = runif(30, 5010000, 5020000) # Y coordinates
+R = 25                          # Radius of the plots
+
+# Return a List of 30 circular LAS objects of 25 m radius
+#' catalog %>% roi_query(X, Y, R)
+```
+
+An internal algorithm will determine wich files must be loaded. For those plots falling between two or more tiles the algotithm is able to detect that and will load the appropriate files to extract automatically every plot.
+
+The circular ROI is not the only avaible shape. Rectangular ROIs are also possible. Check out the doc.
 
 The function return a list of `LAS` objects.
