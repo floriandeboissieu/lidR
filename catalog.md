@@ -9,8 +9,10 @@ A catalog is the representation of a set of las files. **A computer cannot load 
 
 # Create a Catalog
 
-    catalog = Catalog("<Path to a folder containing a set of las or laz files>")
-    head(catalog@headers)
+````r
+catalog = Catalog("<Path to a folder containing a set of las or laz files>")
+head(catalog@headers)
+````
 
 A Catalog object contains a data.frame in the slot `@headers` with the 
 data read from the headers of all user's las/laz files. A column  `filename` is also dedicated to the reference of the files path.
@@ -19,7 +21,9 @@ data read from the headers of all user's las/laz files. A column  `filename` is 
 
 Based on the metadata contained in the las file. The plot function draw the rectangular hull of each files.
 
-    plot(catalog)
+````r
+plot(catalog)
+````
     
 ![](images/catalog.png)
 
@@ -27,37 +31,55 @@ Based on the metadata contained in the las file. The plot function draw the rect
 
 The interactive function `selectTiles` enable the user to click with the mouse on the desired tiles. This function works at least in RStudio. It has never be tested in other environnement. When the selection is done, the user must press the button that appears above the map to indicate that its selection is ended. Then the selected tiles are colorized in red and the function returns a `Catalog` object containing only the desired tiles. Then, these tiles can be loaded with the [readLAS](loadLidar.html) function.
 
-    selectedTiles = selectTiles(catalog)
-    lidar = readLAS(selectedTiles)
+````r
+selectedTiles = selectTiles(catalog)
+lidar = readLAS(selectedTiles)
+````
     
 ![](images/catalog-selected.png)
 
 # Process all the file of a Catalog
 
-The function `processParallel` enable to analyse all the tiles of a catalog. For Linux users the function can parallelize the process on several cores. For Windows users only one core can be use.
+The function `processParallel` enable to analyse all the tiles of a catalog. The behaviours of the function are different on Unix (GNU/Linux) and Windows platform. Read the documentation for technical details.
 
 ## Create your own process function
 
-The input of the `processParallel` function is a function. This function must be defined by the user and must have a single parameter which is the name of a las file. Then, the user can do whatever he want in this function. Typically, open the las files and process it. The following example is very basic (see also [gridMetrics](gridMetrics.html)).
+The input of the `processParallel` function is a function. This function must be defined by the user and must have a single parameter which is the name of a las or laz file. Then, the user can do whatever he want in this function. Typically, open the las files and process it. The following example is very basic (see also [gridMetrics](gridMetrics.html)).
 
-    analyse_tile = function(LASFile)
-    {
-      # Load the data
-      lidar = readLAS(LASFile)
+````r
+analyse_tile = function(LASFile)
+{
+   # Load the data
+  lidar = readLAS(LASFile)
     
-      # compute my metrics
-      metrics = gridMetrics(lidar, 20, myMetrics(X,Y,Z,Intensity,ScanAngle,pulseID))
+  # compute my metrics
+  metrics = gridMetrics(lidar, 20, myMetrics(X,Y,Z,Intensity,ScanAngle,pulseID))
     
-      return(metrics)
-    }
+  return(metrics)
+}
+````
     
-Obviously the function can be more complicated. For example it can filter lakes from shapefile (see also [classifyFromShapefile](classifyFromShapefile.html))
+Obviously the function can be more complicated. For example it can filter lakes from shapefile (see also [classifyFromShapefile](classifyFromShapefile.html)).
+The function `myMetrics` must be written by the user too (see also [gridMetrics](gridMetrics.html)).
 
 ## Apply this function on the catalog
 
-By default it detects how many core you have if you run it under Linux. But you can add an optional parameter ̀ mc.core = 3`. see ?mclapply for other options. For Windows users this function becomes an automatic for loop like function.
+By default it detects how many core you have. But you can add an optional parameter `mc.core = 3`. For technical reasons explained in the documentation, the code for Unix (GNU/Linux and Mac) users differ from those for Windows users. Note that code for Windows works for both platform but not the opposite. Read the documentation carefully.
 
-    output = project %>% processParallel(analyse_tile)
+#### Unix
+
+````r
+output = project %>% processParallel(analyse_tile)
+````
+
+#### Windows
+
+In windows mode, the child process cannot access to a shared memory. So, users must export their object themselves. Read the documentation carefully.
+
+````r
+export = c("readLAS", "gridMetrics", "myMetrics")
+output = project %>% processParallel(analyse_tile, varlist = export)
+````
     
 # Extract a ground inventory
 
