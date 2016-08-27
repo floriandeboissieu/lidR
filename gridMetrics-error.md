@@ -1,21 +1,21 @@
 ---
 layout: default
-title: Common misusage of gridMetrics
+title: Common misusage of gridmetrics
 ---
 
-The user can misuse the `gridMetrics` function by using a function which is not appropriate. For example, the following are not allowed: 
+The user can misuse the `gridmetrics` function by using a function which is not appropriate. For example, the following are not allowed: 
 
-    gridMetrics(lidar, 20, LAD(Z))
-    gridMetrics(lidar, 20, head(Z))
-    gridMetrics(lidar, 20, range(Intensity))
-    gridMetrics(lidar, 20, quantile(Z))
+    gridmetrics(lidar, 20, LAD(Z))
+    gridmetrics(lidar, 20, head(Z))
+    gridmetrics(lidar, 20, range(Intensity))
+    gridmetrics(lidar, 20, quantile(Z))
 
 1. `LAD` returns a `data.frame`.
 2. `head`returns a  `vector`
 3. `range`returns a `vector`
 4. `quantile`returns a `vector`
 
-The expression provided to `gridMetrics` must return a single number or a `list` of single numbers. If it is not the case, the function will crash. An internal system enable to prevent crash checking the validity of the input expression before to run the `gridMetrics` function. The returned error might be helpful for the user.
+The expression provided to `gridmetrics` must return a single number or a `list` of single numbers. If it is not the case, the function will crash. An internal system enable to prevent crash checking the validity of the input expression before to run the `gridmetrics` function. The returned error might be helpful for the user.
 
 ## Example of quantiles
 
@@ -29,9 +29,9 @@ By defining a new quantile function which calls the original you can change the 
         return(q)
     }
     
-Then use this function. This the basic way `gridMetrics` works.
+Then use this function. This the basic way `gridmetrics` works.
     
-    metrics = gridMetrics(lidar, 20, myQuantile(Z))
+    metrics = gridmetrics(lidar, 20, myQuantile(Z))
     head(metrics)
 
             X       Y   q0   q25   q50     q75  q100
@@ -45,7 +45,7 @@ Then use this function. This the basic way `gridMetrics` works.
     
 You can use it with optional arguments.
 
-    metrics = gridMetrics(lidar, 20, myQuantile(Z, seq(0.1,0.9,0.1)))
+    metrics = gridmetrics(lidar, 20, myQuantile(Z, seq(0.1,0.9,0.1)))
     hean(metrics)
     
             X       Y  q10   q20   q30   q40   q50   q60   q70    q80    q90
@@ -59,11 +59,11 @@ You can use it with optional arguments.
 
 ## Common errors
 
-     gridMetrics(lidar, 20, LAD(Z))
+     gridmetrics(lidar, 20, LAD(Z))
 
 > \> Erreur : The expression 'LAD(Z)' returned a data.frame. A single number or a list of single number is expected.
 
-     gridMetrics(lidar, 20, quantile(Z))
+     gridmetrics(lidar, 20, quantile(Z))
 
 > \> Erreur : The expression 'quantile(Z)' returned a vector of lenght 5. A single number or a list of single number is expected.
 
@@ -79,7 +79,7 @@ You can use it with optional arguments.
        return(ret)
     }
   
-    metrics = gridMetrics(lidar, 20, myMetrics(Z, Intensity, ScanAngle, pulseID))
+    metrics = gridmetrics(lidar, 20, myMetrics(Z, Intensity, ScanAngle, pulseID))
 
 > \> Erreur : The expression 'myMetrics(Z, Intensity, ScanAngle, pulseID)' returned a list in which all elements are not a single numeric or logical value. The metric 'lad' is a data.frame.
 
@@ -94,6 +94,6 @@ You can use it with optional arguments.
        return(ret)
     }
   
-    metrics = gridMetrics(lidar, 20, myMetrics(Z, Intensity, ScanAngle, pulseID))
+    metrics = gridmetrics(lidar, 20, myMetrics(Z, Intensity, ScanAngle, pulseID))
     
 > \>  Erreur : The expression 'myMetrics(Z, Intensity, ScanAngle, pulseID)' returned a list in which all elements are not a single value. The metric 'iq' has a length of 5.

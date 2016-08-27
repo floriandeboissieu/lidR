@@ -1,9 +1,9 @@
 ---
 layout: default
-title: Advanced used of gridMetrics
+title: Advanced used of gridmetrics
 ---
 
-`gridMetrics` returns a list of plots with the associated metrics. But some plots fall in water and the algorithm cannot guess that. Some plots are incomplete because they fall at the edge of the file or the edge of a flightline, or at the edge of a void area (providers removed some data), or for other reasons. The algorithm makes cells but it does not control what is in the cells. You can control the quality of cells in two ways.
+`gridmetrics` returns a list of plots with the associated metrics. But some plots fall in water and the algorithm cannot guess that. Some plots are incomplete because they fall at the edge of the file or the edge of a flightline, or at the edge of a void area (providers removed some data), or for other reasons. The algorithm makes cells but it does not control what is in the cells. You can control the quality of cells in two ways.
 
 The user must be able to filter the bad cells. Several possibilities are available.
 
@@ -28,13 +28,13 @@ We can add control metrics in the metric function. For example, compute the real
       )
     }
   
-    metrics = gridMetrics(lidar, 10, myMetrics(X, Y, Z, Intensity, ScanAngle, pulseID))
+    metrics = gridmetrics(lidar, 10, myMetrics(X, Y, Z, Intensity, ScanAngle, pulseID))
 
 You can see that some plots have an area which is not 100 m^2 (10 x 10). That means that these plots are probably on the edge of the file or on the edge of the lake. Verification:
 
     plot(metrics, "A")
     
-![](images/gridMetrics-A.jpg)
+![](images/gridmetrics-A.jpg)
 
 So the metrics must be cleaned:
     
@@ -58,7 +58,7 @@ There is a now a new column named `lake`. Each point is classified. `TRUE`: the 
     forest = lidar %>% leach(lake == FALSE)
     forest %>% plot
     
-You can also compute the number of points classified as lake in the `gridMetrics` function:
+You can also compute the number of points classified as lake in the `gridmetrics` function:
 
     myMetrics = function(x, y, z, i, angle, pulseID, lake)
     {
@@ -78,15 +78,15 @@ You can also compute the number of points classified as lake in the `gridMetrics
       )
     }
   
-    metrics = gridMetrics(lidar, 10, myMetrics(X, Y, Z, Intensity, ScanAngle, pulseID, lake))
+    metrics = gridmetrics(lidar, 10, myMetrics(X, Y, Z, Intensity, ScanAngle, pulseID, lake))
     
     plot(metrics, "nlake")
     
-![](images/gridMetrics-nlake.jpg)
+![](images/gridmetrics-nlake.jpg)
 
 And filter the resulting raster which has no points into a lake and which has a defined area.
 
     metricsCleaned = dplyr::filter(metrics, A > 380, nlake == 0)
     plot(metricsCleaned, "hmean")
     
-![](images/gridMetrics-hmeanclean.jpg)
+![](images/gridmetrics-hmeanclean.jpg)

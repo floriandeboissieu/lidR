@@ -21,8 +21,8 @@ lidR provides an open-source and R-based implementation of the main functions fr
 - [Retrieve indiviual pulses](loadLidar.html#dynamically-computed-field)
 - [Retrieve individual flightlines](loadLidar.html#dynamically-computed-fields)
 - [Compute a digital canopy model](canopy.html)
-- [Compute any set of metrics on a cloud of points](gridMetrics.html#cloudmetrics)
-- [Rasterize and apply any function to compute a set of metrics using an area-based approach](gridMetrics.html)
+- [Compute any set of metrics on a cloud of points](gridmetrics.html#cloudmetrics)
+- [Rasterize and apply any function to compute a set of metrics using an area-based approach](gridmetrics.html)
 - [Classify and filter data from geographic shapefiles](classifyFromShapefile.html)
 - [Filter a cloud of points based on any condition test](extract.html)
 - [Thin a cloud of points to reach an homogeneous point density](thin.html)
@@ -31,7 +31,7 @@ lidR provides an open-source and R-based implementation of the main functions fr
 - [Extract automatically a set of ground plot inventories (even plots falling between two or more tiles)](catalog.html#extract-a-ground-inventory)
 - [Analyse a full set of tiles in parallel computing](catalog.html)
 - [Plot 3D LiDAR data](plotLidar.html)
-- [plot metrics in 2D and 3D](gridMetrics.html)
+- [plot metrics in 2D and 3D](gridmetrics.html)
     
 # Some examples
     
@@ -45,10 +45,10 @@ lidR provides an open-source and R-based implementation of the main functions fr
 
 ## Compute a simple metric
 
-    metric = gridMetrics(lidar, 20, mean(Z))
+    metric = gridmetrics(lidar, 20, mean(Z))
     plot(metric)
 
-![](images/gridMetrics-mean.jpg)
+![](images/gridmetrics-mean.jpg)
     
 ## Compute a set of user-defined metrics
 
@@ -65,7 +65,7 @@ lidR provides an open-source and R-based implementation of the main functions fr
        return(ret)
     }
     
-    metrics = gridMetrics(lidar, 20, myMetrics(Z, Intensity, ScanAngle, pulseID))
+    metrics = gridmetrics(lidar, 20, myMetrics(Z, Intensity, ScanAngle, pulseID))
 
     plot(metrics, "hmean")
     plot(metrics, "hmax")
