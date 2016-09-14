@@ -15,7 +15,7 @@ hmean = lidar %>% grid_metrics(20, mean(Z))
 plot(hmean)
 ```
     
- ![](images/grid_metrics-mean.jpg)
+ ![](images/gridMetrics-mean.jpg)
  
 Several functions provided by the package correspond to a `grid_metrics` alias.
 
@@ -26,7 +26,7 @@ canopy = lidar %>% grid_metrics(2, max(Z))
 plot(canopy)
 ```
     
-![](images/grid_metrics-canopy.jpg)
+![](images/gridMetrics-canopy.jpg)
 
 `grid_density` is an alias for:
 
@@ -78,13 +78,17 @@ The about page [common miss usage of grid_metrics](gridmetrics-error.html) provi
 
 `grid_metrics` allows for an optional parameter named `option`. You can set this parameter to `"split_flighline"`. In this case, the algorithm will compute the metrics on each flighline individually. In this case in the overlaps, for example, you will have the same raster twice.
 
-    metrics = grid_metrics(lidar, 20, myMetrics(Z, Intensity, ScanAngle, pulseID, 400), option = "split_flightline")
+```r
+metrics = grid_metrics(lidar, 20, myMetrics(Z, Intensity, ScanAngle, pulseID, 400), option = "split_flightline")
+```
 
 ## cloudMetrics
 
 The function `cloudMetrics` works exactly like `grid_metrics` but it does not have a `resolution` parameter and it does not make cells. It only computes one or several metrics on a cloud of points based on the function given in the parameter. It is useful for computing metrics on a single plot inventory.
 
-    metrics = cloud_metrics(lidar, myMetrics(Z, Intensity, ScanAngle, pulseID, 400), option = "split_flightline")
+```r
+metrics = cloud_metrics(lidar, myMetrics(Z, Intensity, ScanAngle, pulseID, 400), option = "split_flightline")
+```
 
 ## Quality control for grid_metrics and geographic data
 
