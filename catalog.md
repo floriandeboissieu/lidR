@@ -29,10 +29,10 @@ plot(catalog)
 
 # Select files in a Catalog
 
-The interactive function `select_tiles` enable the user to click with the mouse on the desired tiles. This function works at least in RStudio. It has never be tested in other environnement. When the selection is done, the user must press the button that appears above the map to indicate that its selection is ended. Then the selected tiles are colorized in red and the function returns a `Catalog` object containing only the desired tiles. Then, these tiles can be loaded with the [readLAS](loadLidar.html) function.
+The interactive function `tiles_select` enable the user to click with the mouse on the desired tiles. This function works at least in RStudio. It has never be tested in other environnement. When the selection is done, the user must press the button that appears above the map to indicate that the selection is ended. Then the selected tiles are colorized in red and the function returns a `Catalog` object containing only the desired tiles. Then, these tiles can be loaded with the [readLAS](loadLidar.html) function.
 
 ````r
-selectedTiles = select_tiles(catalog)
+selectedTiles = tiles_select(catalog)
 lidar = readLAS(selectedTiles)
 ````
     
@@ -40,11 +40,11 @@ lidar = readLAS(selectedTiles)
 
 # Process all the file of a Catalog
 
-The function `processParallel` enable to analyse all the tiles of a catalog. The behaviours of the function are different on Unix (GNU/Linux) and Windows platform. Read the documentation for technical details.
+The function `process_parallel` enable to analyse all the tiles of a catalog. The behaviours of the function are different on Unix (GNU/Linux) and Windows platform. Read the documentation for technical details.
 
 ## Create your own process function
 
-The input of the `processParallel` function is a function. This function must be defined by the user and must have a single parameter which is the name of a las or laz file. Then, the user can do whatever he want in this function. Typically, open the las files and process it. The following example is very basic (see also [gridmetrics](gridmetrics.html)).
+The input of the `process_parallel` function is a function. This function must be defined by the user and must have a single parameter which is the name of a las or laz file. Then, the user can do whatever he want in this function. Typically, open the las files and process it. The following example is very basic (see also [gridmetrics](gridmetrics.html)).
 
 ````r
 analyse_tile = function(LASFile)
@@ -53,7 +53,7 @@ analyse_tile = function(LASFile)
   lidar = readLAS(LASFile)
     
   # compute my metrics
-  metrics = gridmetrics(lidar, 20, myMetrics(X,Y,Z,Intensity,ScanAngle,pulseID))
+  metrics = grid_metrics(lidar, 20, myMetrics(X,Y,Z,Intensity,ScanAngle,pulseID))
     
   return(metrics)
 }
@@ -77,7 +77,7 @@ output = project %>% processParallel(analyse_tile)
 In windows mode, the child process cannot access to a shared memory. So, users must export their object themselves. Read the documentation carefully.
 
 ````r
-export = c("readLAS", "gridmetrics", "myMetrics")
+export = c("readLAS", "grid_metrics", "myMetrics")
 output = project %>% processParallel(analyse_tile, varlist = export)
 ````
     

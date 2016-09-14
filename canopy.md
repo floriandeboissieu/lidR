@@ -5,18 +5,19 @@ title: Digital model of canopy
 
 ## Default usage
 
-`canopyModel` creates a canopy surface model using a LiDAR cloud of points. Using the local maximum algorithm, it assigns the elevation of the highest return within each grid cell to the grid cell center. It returns an object of class `gridmetrics`. A `gridmetrics` object is a `data.table` and therefore a `data.frame`, but because it is also a `gridmetrics` object you can plot it easily in 2D or 3D.
+`grid_canopy` creates a canopy surface model using a LiDAR cloud of points. Using the local maximum algorithm, it assigns the elevation of the highest return within each grid cell to the grid cell center. It returns an object of class `grid_metrics`. A `grid_metrics` object is a `data.table` and therefore a `data.frame`, but because it is also a `grid_metrics` object you can plot it easily in 2D or 3D.
 
-	canopy = canopyModel(lidar)
-	plot(canopy)
-	plot3d(canopy)
+```r
+canopy = grid_canopy(lidar)
+plot(canopy)
+```
 
-
-![](images/gridmetrics-canopy.jpg)
-![](images/plot3d_canopy.jpg)
+![](images/grid_metrics-canopy.jpg)
 
 ## Resolution
 
-`canopyModel` has an optional parameter `resolution`. The cell size is the square of the resolution. Default is 2.
+`grid_canopy` has an optional parameter `res`. The cell size is the square of the resolution. Default is 2.
 
-	canopy = canopyModel(lidar, res = 2)
+```r
+canopy = grid_canopy(lidar, res = 2)
+```
