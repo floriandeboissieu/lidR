@@ -39,16 +39,18 @@
 #' @param x vector. A set of x coordinates corresponding to the center of the ROI
 #' @param y vector. A set of y coordinates corresponding to the center of the ROI
 #' @param r numeric or vector. A radius or a set of radii of the ROI. If only
-#' radius is provided (r2 = NULL) it will extract data falling into a disc.
+#' r is provided (r2 = NULL) it will extract data falling into a disc.
 #' @param r2 numeric or vector. A radius or a set of radii of plots. If r2
 #' is provided, the selection turns into a rectangular ROI. If r = r2 it is a square obviouly.
-#' @param roinames vector. A set of ROI names (the ID of the plots for example).
-#' @param mc.core numeric. The number of cores for parallel processing (see \link[parallel:makeCluster]).
+#' @param roinames vector. A set of ROI names (the ID of the plots for example)
+#' @param mc.cores numeric. The number of cores for parallel processing (see \link[parallel:makeCluster]{makeCluster})
 #' @param ... additionnal parameters for \link[lidR:readLAS]{readLAS}
 #' @return A list of LAS objects
 #' @export roi_query
 #' @importFrom dplyr progress_estimated
+#' @importFrom utils lsf.str
 #' @importFrom magrittr %>% %<>%
+#' @importFrom parallel makeCluster stopCluster parLapply clusterExport
 #' @examples
 #' \dontrun{
 #' # Build a Catalog
@@ -65,74 +67,69 @@
 #' # Return a List of 30 square LAS objects of 50x50 m
 #' catalog %>% roi_query(X, Y, R, R)
 #' }
-setGeneric("roi_query", function(obj, x, y, r, r2 = NULL, roinames = NULL, mc.cores=NULL, ...){standardGeneric("roi_query")})
+setGeneric("roi_query", function(obj, x, y, r, r2 = NULL, roinames = NULL, mc.cores = NULL, ...){standardGeneric("roi_query")})
 
 #' @rdname roi_query
 setMethod("roi_query", "Catalog",
-  function(obj, x, y, r, r2 = NULL, roinames = NULL, mc.cores=NULL, progress=T, ...)
+  function(obj, x, y, r, r2 = NULL, roinames = NULL, mc.cores = NULL, ...)
   {
     . <- tiles <- NULL
 
-    CIRCLE = 0
-    RECTANGLE = 1
+    nplot = length(x)
+    shape = if(is.null(r2)) 0 else 1
 
-    nplot  = length(x)
-    k      = 1
-    type   = if(is.null(r2)) CIRCLE else RECTANGLE
-
-    if(is.null(roinames)) roinames = paste("ROI", 1:nplot, sep="")
+    if(is.null(roinames)) roinames = paste0("ROI", 1:nplot)
 
     # Make an index of the file in which are each query
     lasindex = obj %>% roi_index(x, y, r, r2,roinames)
 
     # Group the index of idendical queries with the aim to reduce number ofqueries
-    lasindex = lasindex[,.(roinames = list(roinames),
-                           X = list(x),
-                           Y = list(y),
-                           r = list(r),
-                           r2 = list(r2),
-                           tiles=list(unique(unlist(tiles)))),
-                        by=list(paste(tiles))][,paste := NULL]
+    lasindex = lasindex[, .(roinames = list(roinames),
+                            X = list(x), Y = list(y),
+                            r = list(r), r2 = list(r2),
+                            tiles = list(unique(unlist(tiles)))),
+                        by = list(paste(tiles))][,paste := NULL]
 
-    nqueries = dim(lasindex)[1]
+    lasindex = apply(lasindex, 1, as.list)
 
     cat("Extracting data...\n")
 
-    if(is.null(mc.cores)){
+    if(is.null(mc.cores) | mc.cores == 1)
+    {
       p = dplyr::progress_estimated(nplot)
-      output=lapply(X=apply(lasindex,1,as.list),.getGrpQuery,type,p,...)
-    }else{
-      cl=parallel::makeCluster(mc.cores, outfile = "")
+      output = lapply(lasindex, .getGrpQuery, shape, p, ...)
+    }
+    else
+    {
+      cl = parallel::makeCluster(mc.cores, outfile = "")
       parallel::clusterExport(cl, varlist=c(lsf.str(envir = globalenv()), ls(envir = environment())), envir = environment())
-      output=parallel::parLapply(cl,X=apply(lasindex,1,as.list),.getGrpQuery,type,...)
+      output = parallel::parLapply(cl, lasindex, .getGrpQuery, shape, ...)
       parallel::stopCluster(cl)
     }
-    
-    output=unlist(output)
-    ## set back to the original order
-    output=output[match(roinames,names(output))]
-    
+
+    output = unlist(output)
+    output = output[match(roinames, names(output))]  # set back to the original order
+
     cat("\n")
 
     return(output)
   }
 )
 
-#'
-.getGrpQuery=function(query, type, p=NULL, ...){
+.getGrpQuery = function(query, shape, p = NULL, ...)
+{
+  X      = query$X
+  Y      = query$Y
+  r      = query$r
+  r2     = query$r2
+  files  = query$tiles
 
-  X     = query$X
-  Y     = query$Y
-  r     = query$r
-  r2    = query$r2
-  files = query$tiles
-  
-  lidar = readLAS(files,...)
-  output=vector("list", length(X))
-  
+  lidar  = readLAS(files, ...)
+  output = vector("list", length(X))
+
   for(j in 1:length(X))
   {
-    if(type)
+    if(shape == 0)
       output[[j]] = clipCircle(lidar, X[j], Y[j], r[j])
     else
       output[[j]] = clipRectangle(lidar, X[j]-r[j], Y[j]-r2[j], X[j]+r[j], Y[j]+r2[j])
@@ -140,11 +137,12 @@ setMethod("roi_query", "Catalog",
     if(!is.null(p))
       p$tick()$print()
     else
-      cat(sprintf("%s ",query$roinames[j]))
+      cat(sprintf("%s ", query$roinames[j]))
   }
-  names(output)=query$roinames[[1]]
-  rm(list="lidar")
-  gc()
+
+  names(output) = query$roinames[[1]]
+  rm(list = "lidar") ; gc()
+
   return(output)
 }
 
