@@ -168,6 +168,7 @@ catalog_queries.LAScatalog = function(obj, x, y, r, r2 = NULL, buffer = 0, roina
   {
     for (i in 1:length(output))
       output[[i]]@data <- data.table::alloc.col(output[[i]]@data)
+      output[[i]]@crs <- obj@crs
   }
 
   return(output)
